@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
-const { DB_HOST, PORT } = process.env;
+const app = require("./app");
+const { MONGODB_URI, PORT } = process.env;
 
 mongoose
-  .connect(DB_HOST, {
+  .connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -15,9 +16,4 @@ mongoose
     process.exit(1);
   });
 
-// Предполагаем, что роуты и контроллеры уже созданы и импортированы
-// app.use('/api/companies', require('./routes/companies'));
-// app.use('/api/drugs', require('./routes/drugs'));
 
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

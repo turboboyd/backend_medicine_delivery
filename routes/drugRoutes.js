@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const drugController = require("../controllers/drugController");
+const drugStoreController = require("../controllers/drugStoreController");
 
-router.get("/", drugController.getAllDrugs);
-router.get("/company/:companyId", drugController.getDrugsByCompany);
+router.post("/", drugStoreController.createDrugStore);
+router.get("/", drugStoreController.getAllDrugStores);
 
 module.exports = router;
