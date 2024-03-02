@@ -3,18 +3,23 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 
-
-const drugRoutes = require("./routes/drugRoutes");
-
-
 const app = express();
+
+const drugRoutes = require("./routes/api/drugRoutes");
+
+
+app.use("/api/drug-stores", drugRoutes);
+
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
-app.use("/drug-stores", drugRoutes);
+
+
+
+
 
 
 
