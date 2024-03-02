@@ -6,8 +6,7 @@ const medicineSchema = new Schema({
   availableInStores: [
     {
       storeId: {
-        type: Schema.Types.ObjectId,
-        ref: "DrugStore",
+        type: String,
         required: true,
       },
       price: { type: Number, required: true },

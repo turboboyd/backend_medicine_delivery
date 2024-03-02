@@ -1,30 +1,60 @@
 const DrugStore = require("../models/DrugStoreModel");
+const Medicine = require("../models/MedicineModel");
 const { validateDrugStore } = DrugStore;
 
-exports.createDrugStore = async (req, res) => {
-  console.log('res: ', res);
-  console.log('req: ', req);
+// Миддлвар для обработки асинхронных функций
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch((err) => {
+    res.status(500).send(err.message);
+  });
+};
+
+exports.createDrugStore = asyncHandler(async (req, res) => {
   const { error } = validateDrugStore(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const drugStore = new DrugStore({
-    name: req.body.name,
-    address: req.body.address,
+  const drugStore = new DrugStore(req.body);
+  await drugStore.save();
+  res.send(drugStore);
+});
+
+exports.getAllDrugStores = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+  const skip = (page - 1) * pageSize;
+
+  const drugStores = await DrugStore.find().skip(skip).limit(pageSize);
+
+  const total = await DrugStore.countDocuments();
+
+  res.send({
+    page,
+    pageSize,
+    total,
+    data: drugStores,
+  });
+});
+
+exports.getMedicinesByDrugStore = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+  const skip = (page - 1) * pageSize;
+
+  const drugStoreId = req.params.id;
+  const medicines = await Medicine.find({
+    "availableInStores.storeId": drugStoreId,
+  })
+    .skip(skip)
+    .limit(pageSize);
+
+  const total = await Medicine.countDocuments({
+    "availableInStores.storeId": drugStoreId,
   });
 
-  try {
-    await drugStore.save();
-    res.send(drugStore);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-};
-
-exports.getAllDrugStores = async (req, res) => {
-  try {
-    const drugStores = await DrugStore.find();
-    res.send(drugStores);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-};
+  res.send({
+    page,
+    pageSize,
+    total,
+    data: medicines,
+  });
+});
