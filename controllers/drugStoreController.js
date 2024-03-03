@@ -1,9 +1,5 @@
 const DrugStore = require("../models/DrugStoreModel");
-const {
-  Medicine,
-  medicineSchema,
-  validateMedicine,
-} = require("../models/MedicineModel");
+const { Medicine } = require("../models/MedicineModel");
 const getPaginatedData = require("../utils/getPaginatedData");
 const ctrlWrapper = require("../helpers/ctrlWrapper");
 const { validateDrugStore } = DrugStore;
