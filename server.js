@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const app = require("./app");
-const { MONGODB_URI, PORT } = process.env;
+const { MONGODB_URI, PORT = 5000 } = process.env;
 
 mongoose
   .connect(MONGODB_URI, {
