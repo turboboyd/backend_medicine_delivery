@@ -15,17 +15,42 @@ const medicineSchema = new Schema({
   ],
 });
 
-const medicineJoiSchema = Joi.object({
-  name: Joi.string().required(),
-  availableInStores: Joi.array().items(
-    Joi.object({
-      storeId: Joi.string().required(),
-      price: Joi.number().required(),
-      availableQuantity: Joi.number().required(),
-    })
-  ),
+const medicineItemSchema = Joi.object({
+  storeId: Joi.string().required(),
+  price: Joi.number().required(),
+  availableQuantity: Joi.number().required(),
 });
 
-module.exports = model("Medicine", medicineSchema);
-module.exports.validateMedicine = (medicine) =>
+const medicineJoiSchema = Joi.object({
+  name: Joi.string().required(),
+  availableInStores: Joi.array().items(medicineItemSchema),
+});
+
+const medicineItemOderSchema = Joi.object({
+  medicineId: Joi.string().required(),
+  storeId: Joi.string().required(),
+  quantity: Joi.number().required(),
+});
+
+const medicinesArraySchema = Joi.array()
+  .items(medicineItemSchema)
+  .min(1)
+  .required()
+  .messages({
+    "array.min": `The order must be followed for at least one medication.`,
+    "any.required": `A list of medications is required.`,
+  });
+
+const Medicine = model("Medicine", medicineSchema);
+const validateMedicine = (medicine) =>
   medicineJoiSchema.validate(medicine);
+
+  module.exports = {
+    Medicine,
+    medicineSchema,
+    medicineJoiSchema,
+    medicineItemSchema,
+    medicinesArraySchema,
+    validateMedicine,
+    medicineItemOderSchema,
+  };

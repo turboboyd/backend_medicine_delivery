@@ -1,50 +1,48 @@
-const DrugStore = require("../models/DrugStore");
-const Order = require("../models/Order");
-const ctrlWrapper = require("../middleware/ctrlWrapper");
+const mongoose = require("mongoose");
+const ctrlWrapper = require("../helpers/ctrlWrapper");
+const { processOrderItems, createOrder } = require("../service/orderService");
+const { Order } = require("../models/Order");
 
-exports.listDrugStores = ctrlWrapper(async (req, res) => {
-  const drugStores = await DrugStore.find({}).populate("medicines");
-  res.json(drugStores);
-});
+const getAllOrders = async (req, res) => {
+  const orders = await Order.find().populate("medicines.medicineId", "name");
+  res.status(200).json(orders);
+};
 
-exports.addToCart = ctrlWrapper((req, res) => {
-  const { medicineId, quantity } = req.body;
-  let cart = req.session.cart ? req.session.cart : [];
-  let itemIndex = cart.findIndex((item) => item.medicineId === medicineId);
+const getOrdersByEmailOrPhone = async (req, res) => {
+  const { searchQuery } = req.params;
 
-  if (itemIndex > -1) {
-    cart[itemIndex].quantity += quantity;
-  } else {
-    cart.push({ medicineId, quantity });
+  const orders = await Order.find({
+    $or: [{ email: searchQuery }, { phoneNumber: searchQuery }],
+  }).populate("medicines.medicineId", "name");
+
+  if (!orders.length) {
+    return res.status(404).send("Orders not found");
   }
 
-  req.session.cart = cart;
-  res.status(200).send("Товар добавлен в корзину");
-});
+  res.status(200).json(orders);
+};
 
-exports.viewCart = ctrlWrapper((req, res) => {
-  res.json(req.session.cart || []);
-});
+const placeOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-exports.placeOrder = ctrlWrapper(async (req, res) => {
-  const { email, phoneNumber, address, medicines } = req.body;
-
-  for (const item of medicines) {
-    const storeItem = await DrugStore.findOne({
-      "medicines._id": item.medicineId,
-    });
-    const medicine = storeItem.medicines.id(item.medicineId);
-    if (medicine.availableQuantity < item.quantity) {
-      return res
-        .status(400)
-        .send(`Недостаточное количество товара: ${medicine.name}`);
-    }
-    medicine.availableQuantity -= item.quantity;
-    await storeItem.save();
+  try {
+    const { email, phoneNumber, name, address, medicines } = req.body;
+    await processOrderItems(medicines, session);
+    await createOrder(email, phoneNumber, name, address, medicines, session);
+    await session.commitTransaction();
+    session.endSession();
+    res.status(201).send("Order successful");
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error when placing an order:", error);
+    res.status(500).send("Server error when placing an order");
   }
+};
 
-  const newOrder = new Order({ email, phoneNumber, address, medicines });
-  await newOrder.save();
-  req.session.cart = [];
-  res.status(201).send("Заказ успешно оформлен");
-});
+module.exports = {
+  placeOrder: ctrlWrapper(placeOrder),
+  getAllOrders: ctrlWrapper(getAllOrders),
+  getOrdersByEmailOrPhone: ctrlWrapper(getOrdersByEmailOrPhone),
+};
