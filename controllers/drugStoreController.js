@@ -1,9 +1,19 @@
 const DrugStore = require("../models/DrugStoreModel");
 const { Medicine } = require("../models/MedicineModel");
 const getPaginatedData = require("../utils/getPaginatedData");
-const ctrlWrapper = require("../helpers/ctrlWrapper");
-console.log(`Current directory: ${process.cwd()}`);
+// const ctrlWrapper = require("../helpers/ctrlWrapper");
 
+const ctrlWrapper = (ctrl) => {
+  const func = async (req, res, next) => {
+    try {
+      await ctrl(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  return func;
+};
 
 const { validateDrugStore } = DrugStore;
 

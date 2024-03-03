@@ -1,7 +1,18 @@
 const mongoose = require("mongoose");
-const ctrlWrapper = require("../helpers/ctrlWrapper");
+// const ctrlWrapper = require("../helpers/ctrlWrapper");
 const { processOrderItems, createOrder } = require("../service/orderService");
 const { Order } = require("../models/Order");
+const ctrlWrapper = (ctrl) => {
+  const func = async (req, res, next) => {
+    try {
+      await ctrl(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  return func;
+};
 
 const getAllOrders = async (req, res) => {
   const orders = await Order.find().populate("medicines.medicineId", "name");
