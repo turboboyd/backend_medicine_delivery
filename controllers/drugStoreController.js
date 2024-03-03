@@ -5,7 +5,7 @@ const {
   validateMedicine,
 } = require("../models/MedicineModel");
 const getPaginatedData = require("../utils/getPaginatedData");
-const ctrlWrapper = require("../Helpers/ctrlWrapper");
+const ctrlWrapper = require("../helpers/ctrlWrapper");
 const { validateDrugStore } = DrugStore;
 
 const createDrugStore = async (req, res) => {
