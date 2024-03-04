@@ -6,7 +6,7 @@ This project is a Node.js-based web application/API. It follows a structured app
 
 This project is built using the following technologies:
 
-- **Node.js**: A JavaScript runtime built on Chrome's V8 JavaScript engine.
+- **Node.js**
 - **Express.js**
 - **MongoDB**
 - **Mongoose**
@@ -100,7 +100,7 @@ This project is built using the following technologies:
       ]
     }
     ```
-    
+
 ##  <h3 align="left">📫 Connect with me:</h3>
 
 <p align="left"> 
