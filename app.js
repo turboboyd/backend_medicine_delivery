@@ -12,6 +12,11 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the backend_medicine_delivery API!");
+});
+
 app.use("/api/drug-stores", drugRoutes);
 app.use("/api/stores", storeRoutes);
 
